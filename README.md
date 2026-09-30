@@ -5,6 +5,7 @@ Privacy-focused, self-hosted medical document OCR pipeline using n8n, local Visi
 An automated, self-hosted document processing pipeline built with **n8n**, integrating **Discord Bot Triggers**, **PDF-to-Image Rendering**, and local **Vision-Language Models (VLM)** via OpenAI-compatible endpoints. 
 
 Designed for low-latency, privacy-focused medical document parsing without relying on external third-party API services for optical character recognition.
+Local VLM/N8N/Discord Trigger must have certain setting adjusted in order to be hipaa compliant.
 
 ---
 
