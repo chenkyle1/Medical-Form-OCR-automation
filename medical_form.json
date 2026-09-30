@@ -1,0 +1,111 @@
+{
+  "name": "Medical Form OCR",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "messageCreate",
+        "pattern": "startsWith",
+        "value": "/form",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-discord-dnd.discordTriggerDnd",
+      "typeVersion": 1,
+      "position": [
+        32,
+        0
+      ],
+      "id": "32288cca-6ca9-41c6-aba2-59d6ed68623c",
+      "name": "Discord Trigger DND",
+      "credentials": {
+        "discordApiDnd": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Discord DND account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-pdfconvert.pdfConvert",
+      "typeVersion": 1,
+      "position": [
+        464,
+        0
+      ],
+      "id": "4940847b-2d22-4fc9-ab18-9a76ef6b99da",
+      "name": "PDF Convert"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.message.attachments[0].attachment }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        256,
+        0
+      ],
+      "id": "cb3d80f0-c986-4825-abe5-134a063e0463",
+      "name": "Download Image"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        0
+      ],
+      "id": "cee0791a-6d7a-4e67-841a-ae2067d1879e",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:1234/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.requestBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1168,
+        0
+      ],
+      "id": "02daea0f-f854-4b4b-9580-45390f90b494",
+      "name": "post request to local VLM"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the binary buffer from the converted PNG\nconst binaryProperty = 'images_page_1'; // Default binary field name in n8n\nconst buffer = await this.helpers.getBinaryDataBuffer(0, binaryProperty);\n\n// Format as a complete, clean data URI\nreturn {\n  json: {\n    dataUrl: `data:image/png;base64,${buffer.toString('base64')}`\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        0
+      ],
+      "id": "df9e484b-986a-43ba-a318-096cb946f29d",
+      "name": "return base64 image"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to safely extract and parse JSON from any nested property or string\nfunction parseDynamicJson(data) {\n  // If input is already an object, return it\n  if (data && typeof data === 'object') {\n    return data;\n  }\n\n  if (typeof data === 'string') {\n    let cleanText = data.trim();\n    \n    // Strip markdown code fences if present (e.g. ```json ... ```)\n    cleanText = cleanText.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '');\n\n    try {\n      return JSON.parse(cleanText);\n    } catch (e) {\n      // Attempt extraction if JSON is embedded inside extra conversational text\n      const firstBrace = cleanText.indexOf('{');\n      const lastBrace = cleanText.lastIndexOf('}');\n      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {\n        try {\n          return JSON.parse(cleanText.substring(firstBrace, lastBrace + 1));\n        } catch (innerErr) {\n          // Fallback parsing failed\n        }\n      }\n    }\n  }\n  return null;\n}\n\n// 1. Get raw input from n8n\nconst input = $input.first().json;\n\n// 2. Resolve target field (handles OpenAI/Qwen responses, direct content, or raw object)\nconst targetContent = input.choices?.[0]?.message?.content \n                   ?? input.choices?.[0]?.message?.reasoning_content \n                   ?? input.content \
+                   ?? input;\n\n// 3. Dynamically parse target into a key-value object\nlet extractedObj = parseDynamicJson(targetContent);\n\n// Fallback: If no valid JSON was found inside text, retain original input keys\nif (!extractedObj || typeof extractedObj !== 'object') {\n  extractedObj = input;\n}\n\n// 4. Construct final dynamic output with all detected key-values\nconst normalizedData = {};\nfor (const [key, value] of Object.entries(extractedObj)) {\n  normalizedData[key] = value ?? null;\n}\n\n// Return output ready for n8n downstream usage\nreturn [\n  {\n    json: normalizedData\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        0
+      ],
+      "id": "50964419-687c-4295-b54d-b7795490e679",
+      "name": "Dynamic Normalization"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  \n
