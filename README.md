@@ -10,6 +10,7 @@ Local VLM/N8N must have certain setting adjusted and different trigger should be
 ---
 
 ## 🏗️ Architecture & Data Flow
+https://raw.githubusercontent.com/chenkyle1/Medical-Form-OCR-automation/refs/heads/main/Workflow.png
 [ Discord Trigger ] ──> [ Download PDF/Image ] ──> [ Convert PDF to PNG ]
 │
 ▼
