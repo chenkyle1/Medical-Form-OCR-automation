@@ -8,7 +8,8 @@ Designed for low-latency, privacy-focused medical document parsing without relyi
 Local VLM/N8N must have certain setting adjusted and different trigger should be used in order to be hipaa compliant.
 
 ---
-<img width="200" height="112" alt="demo" src="https://github.com/user-attachments/assets/2ea3f269-29e6-4c8f-8a05-5585c07b480e" />
+
+<img width="2560" height="1440" alt="DEMO_Workflow" src="https://github.com/user-attachments/assets/fab0b6fe-f5d6-40cf-b5e4-e6d5ac61eef2" />
 
 ## 🏗️ Architecture & Data Flow
 ![image](https://raw.githubusercontent.com/chenkyle1/Medical-Form-OCR-automation/refs/heads/main/Workflow.png)
